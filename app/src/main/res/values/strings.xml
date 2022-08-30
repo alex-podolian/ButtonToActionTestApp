@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ButtonToActionTestApp</string>
+    <string name="description">Please press on below button to perform some action</string>
+    <string name="perform_action">Act</string>
 </resources>
