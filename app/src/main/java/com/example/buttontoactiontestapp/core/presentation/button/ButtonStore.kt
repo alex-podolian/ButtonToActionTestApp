@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.buttontoactiontestapp.core.business.usecases.DefaultFetchActionsConfigCase
 import com.example.buttontoactiontestapp.core.data.api.ApiHelper
 import com.example.buttontoactiontestapp.core.data.api.NetworkManager
+import com.example.buttontoactiontestapp.core.data.model.ButtonAction
 import com.example.buttontoactiontestapp.core.data.repository.ButtonRepository
 import com.example.buttontoactiontestapp.core.presentation.BaseStore
 import com.example.buttontoactiontestapp.core.presentation.EffectPublisher
@@ -23,8 +24,18 @@ class ButtonStore(private val scope: CoroutineScope) :
         statePublisher: StatePublisher<ButtonState>,
         effectPublisher: EffectPublisher<ButtonEffect>
     ): Unit = when (intent) {
-        is ButtonIntent.LoadConfiguration -> loadConfiguration(state, statePublisher, effectPublisher)
-        is ButtonIntent.PerformAction -> performAction()
+        is ButtonIntent.LoadConfiguration -> loadConfiguration(
+            state,
+            statePublisher,
+            effectPublisher
+        )
+        is ButtonIntent.PerformAction -> performAction(
+            state,
+            intent,
+            statePublisher,
+            effectPublisher
+        )
+        is ButtonIntent.FinishRotation -> statePublisher(state.copy(isRotating = false))
     }
 
     private suspend fun loadConfiguration(
@@ -48,6 +59,24 @@ class ButtonStore(private val scope: CoroutineScope) :
         }
     }
 
-    private suspend fun performAction() {
+    private suspend fun performAction(
+        state: ButtonState,
+        intent: ButtonIntent.PerformAction,
+        statePublisher: StatePublisher<ButtonState>,
+        effectPublisher: EffectPublisher<ButtonEffect>
+    ) {
+        chooseAction(intent.buttonActions)
+
+    }
+
+    private fun chooseAction(buttonActions: List<ButtonAction>) {
+        buttonActions.filter { buttonAction -> filterActions(buttonAction) }
+    }
+
+    private fun filterActions(buttonAction: ButtonAction): Boolean {
+        if (!buttonAction.enabled) {
+            return false
+        }
+        return true
     }
 }
